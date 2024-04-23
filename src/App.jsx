@@ -1,10 +1,9 @@
 import * as React from "react";
 import List from './List';
-import Search from "./Search";
+//import Search from "./Search";
 
 
-const App = () => {
-  const stories = [
+  const initialStories = [
     {
       title: "React",
       url: "https://reactjs.org/",
@@ -22,20 +21,64 @@ const App = () => {
       objectID: 1,
     },
   ];
-  const [searchTerm,setSearchTerm] = React.useState('');
+  const App = () => {
+  const [searchTerm,setSearchTerm] = React.useState(localStorage.getItem('search') || 'React');
+  const [stories,setStories] = React.useState(initialStories);
+  const handleRemoveStory = (item) => {
+    const newStories = stories.filter(
+      (story) => item.objectID !== story.objectID
+    );
+    setStories(newStories);
+
+  };
+  React.useEffect(()=> {
+    localStorage.setItem('search',searchTerm);
+  },[searchTerm]
+  );
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
-  return (
-  <div>
-    <h1>My Hacker Stories </h1>
+  const searchedStories =  stories .filter((story) =>
 
-    <Search onSearch={handleSearch} />
-    <p>
+   story.title.toLowerCase ().includes(searchTerm.toLocaleLowerCase())
+  );
+  
+  return (
+    <div>
+      <h1>My Hacker Stories </h1>
+
+      <InputWithLabel
+        id="search"
+        label="Search"
+         value={searchTerm}
+          onInputChange={handleSearch}
+          >
+          <strong>Search : </strong>
+          </InputWithLabel>
+          
+      <p>
       Searching for <strong>{searchTerm}</strong>
       </p>
-    <hr />
-    <List list ={stories} />
-  </div>
+      <hr />
+      <List list ={searchedStories} onRemoveItem={handleRemoveStory} />
+    </div>
   );};
+  const InputWithLabel = ({ 
+    id, 
+    value, 
+    type ="texte",
+    onInputChange,
+    children,
+    }) => (
+    <>
+    <label htmlFor={id}>{children}</label>
+    &nbsp;
+    <input
+    id={id}
+    type={type}
+    value={value}
+    onChange={onInputChange}
+    />
+    </>
+   );
 export default App;
